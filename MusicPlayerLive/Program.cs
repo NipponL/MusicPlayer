@@ -21,7 +21,6 @@ class Program
             {
                 while (reader.Read())
                 {
-                    
                         albums.Add(reader.GetInt32(0), new Album(reader.GetString(1),reader.GetString(2), reader.GetInt32(3)));     
                 }
             }
@@ -37,32 +36,40 @@ class Program
                 while (reader.Read())
                 {
                     Song song = new Song(reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetInt32(3));
-                    albums[reader.GetInt32(4)].AddSong(song);
-                    
+                    albums[reader.GetInt32(4)].AddSong(song);   
                 }
             }
 
             // TODO: 3. commit: "Alle PlayLists aus DB lesen und die Songs zuweisen"
             List<PlayList> playlists = new List<PlayList>();
             // HINWEIS: du kannst die category aus der DB mit "Enum.Parse" parsen: https://learn.microsoft.com/en-us/dotnet/api/system.enum.parse?view=net-7.0
-            //command.CommandText = @"select * from playlists";
-            //using (var reader = command.ExecuteReader())
-            //{
-            //    while (reader.Read())
-            //    {
-            //        playlists.Add(new PlayList(reader.GetString(1), (Category)Enum.Parse(typeof(Category), reader.GetString(2))));
-                    
-            //    }
-            //}
-            //command.CommandText = @"select * from playlist_songs";
-            //using (var reader = command.ExecuteReader())
-            //{
-            //    while (reader.Read())
-            //    {
-            //        playlists[0].AddSong(FindSongById(reader.GetInt32(1), albums));
-            //        playlists[1].AddSong(FindSongById(reader.GetInt32(1), albums));
-            //    }
-            //}
+            command.CommandText = @"select * from playlists";
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    playlists.Add(new PlayList(reader.GetString(1), (Category)Enum.Parse(typeof(Category), reader.GetString(2))));
+
+                }
+            }
+
+
+            command.CommandText = @"SELECT * FROM playlist_songs where playlist_id = 1;";
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    playlists[0].AddSong(FindSongById(reader.GetInt32(1), albums));
+                }
+            }
+            command.CommandText = @"SELECT * FROM playlist_songs where playlist_id = 2;";
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    playlists[1].AddSong(FindSongById(reader.GetInt32(1), albums));
+                }
+            }
             MusicPlayer player = new MusicPlayer();
             foreach (Album album in albums.Values)
             {
